@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Player {
 
-	public int range = 5;
+	public int moveRange = 5;
 	public PlayerManager playerMonobehavior;
 	public GroundPiece piece = null;
 
@@ -23,6 +24,7 @@ public class Player {
 		piece.player = this;
 		this.piece = piece;
 		playerMonobehavior.transform.position = piece.transform.position;
+		GroundManager.instance.UnSetMovablePiecies ();
 	}
 /*	public Player(params object[] args)
 	{

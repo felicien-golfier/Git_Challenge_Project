@@ -3,13 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using System.Security.Policy;
+using UnityEngine.Serialization;
 
-public class GameManager : MonoBehaviour {
+public class GameManager : Singleton<GameManager> {
 
 	public float PlayerNumber = 1;
 	public PlayerManager PlayerTemplate;
 	private List<Player> players = new List<Player> ();
 	private GroundPiece selectedPiece;
+	private Action action = Action.Creation;
+
+	public enum Action{
+		None = 0,
+		//Selected = 1,
+		Moving = 2,
+		Creation = 100
+	}
 
 	// Use this for initialization
 	void Start () {
@@ -22,39 +31,60 @@ public class GameManager : MonoBehaviour {
 		if (Input.GetMouseButtonDown (0))
 		{
 			Transform tmp = Tools.GetSelectedGO ();
-			if (tmp != null) 
-			{
-				GroundPiece piece = tmp.GetComponent<GroundPiece> ();
-				if (piece != null && players.Count < PlayerNumber)
-				{
-					piece.player = CreateNewPlayer (piece.transform.position);
-				}
-				else if (piece != null && selectedPiece != piece && !piece.movable){
-					SelectNewPiece (piece);
-				} else if (piece != null && selectedPiece.player != null && piece.movable){
-					selectedPiece.player.Move (piece);
-				}
-			}
+			GroundPiece piece;
+			if (tmp != null && (piece = tmp.GetComponent<GroundPiece> ()) != null) 
+				ClickOnPiece (piece);
 		}
 	}
 
-	private void SelectNewPiece(GroundPiece piece){
-		if (selectedPiece == piece)
-			return;
-		if (selectedPiece != null)
-		selectedPiece.selected = false;
-		selectedPiece = piece;
-		piece.selected = true;
-		if (piece.player != null)
-			GroundManager.instance.SetMovablePiecies (piece.player);
+	private void ClickOnPiece(GroundPiece piece){
+		
+		switch(action){
 
+		case Action.None:
+			SelectPiece (piece);
+			if (piece.player != null) {
+				GroundManager.instance.SetMovablePiecies (piece.player);
+				action = Action.Moving;
+			}else if (selectedPiece == piece)
+			{
+				
+			}
+			break;
 
+		case Action.Moving:
+			if (selectedPiece.player != null && piece.movable)
+				selectedPiece.player.Move (piece);
+			action = Action.None;
+			break;
 
+		case Action.Creation:
+			if (players.Count < PlayerNumber) {
+				piece.player = CreateNewPlayer (piece);
+			}
+			if (players.Count >= PlayerNumber)
+				action = Action.None;
+			break;
+		default :
+			break;
+		}
 	}
+	private void SelectPiece(GroundPiece piece){
 
-	private Player CreateNewPlayer(Vector3 position)
+		if (selectedPiece != null)
+			selectedPiece.selected = false;
+		if (selectedPiece != piece) {
+			selectedPiece = piece;
+			piece.selected = true;
+		} else
+			selectedPiece = null;
+	}
+		
+		
+	private Player CreateNewPlayer(GroundPiece piece)
 	{
-		Player p = new Player (PlayerTemplate, position);
+		Player p = new Player (PlayerTemplate, piece.transform.position);
+		p.piece = piece;
 		players.Add (p);
 		return p;
 	}

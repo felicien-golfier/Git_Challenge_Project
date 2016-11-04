@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Security.Policy;
+using System.Collections.Generic;
 
 public class GroundManager : Singleton<GroundManager> {
 
@@ -10,8 +11,10 @@ public class GroundManager : Singleton<GroundManager> {
 	public float lengthThreshold = 1;
 	public float widthThreshold = 1;
 	public float heightThreshold = 1;
+
 	public GameObject prefab;
 
+	public List<GroundPiece> movablePiecies;
 	private GroundPiece[][][] ground;
 	private Transform groundPiecies;
 
@@ -53,6 +56,19 @@ public class GroundManager : Singleton<GroundManager> {
 
 	public void SetMovablePiecies(Player player)
 	{
-		
+		int moveRange = player.moveRange;
+		int pk = (int) player.piece.coord.x;
+		int pi = (int) player.piece.coord.y;
+		int pj = (int) player.piece.coord.z;
+		for (int i = pi-moveRange; i< pi+moveRange; i++){
+			for (int j = pj-moveRange;j< pj+moveRange;j++){
+				if (i>=0 && j>=0 && i < ground [pk].Length && j < ground [pk][i].Length)
+					ground [pk] [i] [j].movable = true;
+			}
+		}
+	}
+	public void UnSetMovablePiecies(){
+		List<GroundPiece> tmp = movablePiecies;
+		tmp.ForEach (x=>x.movable = false);
 	}
 }

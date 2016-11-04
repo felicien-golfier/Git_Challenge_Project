@@ -18,7 +18,12 @@ public class GroundPiece : MonoBehaviour{
 		set{
 			if (_movable != value)
 			{
-				
+				blink.SetMove (value, blink.On ? true : value);
+				_movable = value;
+				if (value)
+					GroundManager.instance.movablePiecies.Add (this);
+				else
+					GroundManager.instance.movablePiecies.Remove (this);
 			}
 		}
 	}
