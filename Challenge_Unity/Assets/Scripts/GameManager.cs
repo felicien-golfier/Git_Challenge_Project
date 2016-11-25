@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEditor;
 using System.Security.Policy;
 using UnityEngine.Serialization;
+using System.Xml.XPath;
+using UnityEngine.Assertions;
 
 public class GameManager : Singleton<GameManager> {
 
@@ -17,6 +19,7 @@ public class GameManager : Singleton<GameManager> {
 		None = 0,
 		//Selected = 1,
 		Moving = 2,
+		Attack = 3,
 		Creation = 100
 	}
 
@@ -24,8 +27,7 @@ public class GameManager : Singleton<GameManager> {
 	void Start () {
 		
 	}
-	
-	// Update is called once per frame
+
 	void Update () 
 	{
 		if (Input.GetMouseButtonDown (0))
@@ -35,6 +37,8 @@ public class GameManager : Singleton<GameManager> {
 			if (tmp != null && (piece = tmp.GetComponent<GroundPiece> ()) != null) 
 				ClickOnPiece (piece);
 		}
+		if (selectedPiece != null && selectedPiece.player != null && Input.GetKeyDown ("&"))
+			action = Action.Attack;
 	}
 
 	private void ClickOnPiece(GroundPiece piece){
@@ -65,6 +69,13 @@ public class GameManager : Singleton<GameManager> {
 			if (players.Count >= PlayerNumber)
 				action = Action.None;
 			break;
+
+		case Action.Attack:
+			if (selectedPiece.player != null) {
+				selectedPiece.player.LaunchAttack (piece);
+			}
+			break;
+
 		default :
 			break;
 		}

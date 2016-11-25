@@ -4,9 +4,10 @@ using System.Collections.Generic;
 
 public class Player {
 
-	public int moveRange = 5;
+	public int moveRange = 1;
 	public PlayerManager playerMonobehavior;
 	public GroundPiece piece = null;
+
 
 	public Player(PlayerManager p, Vector3 position)
 	{
@@ -25,6 +26,13 @@ public class Player {
 		this.piece = piece;
 		playerMonobehavior.transform.position = piece.transform.position;
 		GroundManager.instance.UnSetMovablePiecies ();
+	}
+
+	public void LaunchAttack(GroundPiece piece)
+	{
+		ProjectileLife pl = GameObject.Instantiate (playerMonobehavior.projectile).GetComponent<ProjectileLife>();
+		pl.transform.position = playerMonobehavior.transform.position;
+		pl.targetPosition = piece.transform.position;
 	}
 /*	public Player(params object[] args)
 	{
