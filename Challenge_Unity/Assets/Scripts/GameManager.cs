@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using UnityEditor;
 using System.Security.Policy;
 using UnityEngine.Serialization;
-using System.Xml.XPath;
-using UnityEngine.Assertions;
 
 public class GameManager : Singleton<GameManager> {
 
@@ -17,9 +15,8 @@ public class GameManager : Singleton<GameManager> {
 
 	public enum Action{
 		None = 0,
-		//Selected = 1,
+		Attack = 1,
 		Moving = 2,
-		Attack = 3,
 		Creation = 100
 	}
 
@@ -27,7 +24,8 @@ public class GameManager : Singleton<GameManager> {
 	void Start () {
 		
 	}
-
+	
+	// Update is called once per frame
 	void Update () 
 	{
 		if (Input.GetMouseButtonDown (0))
@@ -37,9 +35,20 @@ public class GameManager : Singleton<GameManager> {
 			if (tmp != null && (piece = tmp.GetComponent<GroundPiece> ()) != null) 
 				ClickOnPiece (piece);
 		}
-		if (selectedPiece != null && selectedPiece.player != null && Input.GetKeyDown ("&"))
-			action = Action.Attack;
-	}
+        if (selectedPiece != null && selectedPiece.player != null && Input.GetMouseButtonDown(1))
+        {
+            if (action == Action.Attack)
+            {
+                action = Action.None;
+                UnSelectPiece();
+            }
+            else
+            {
+                action = Action.Attack;
+                GroundManager.instance.UnSetMovablePiecies();
+            }
+        }
+    }
 
 	private void ClickOnPiece(GroundPiece piece){
 		
@@ -47,35 +56,49 @@ public class GameManager : Singleton<GameManager> {
 
 		case Action.None:
 			SelectPiece (piece);
-			if (piece.player != null) {
+			if (piece.player != null)
+            {
 				GroundManager.instance.SetMovablePiecies (piece.player);
 				action = Action.Moving;
-			}else if (selectedPiece == piece)
-			{
-				
 			}
 			break;
 
 		case Action.Moving:
-			if (selectedPiece.player != null && piece.movable)
-				selectedPiece.player.Move (piece);
+                if (selectedPiece == null || selectedPiece == piece )
+                {
+                    SelectPiece(piece);
+                    GroundManager.instance.UnSetMovablePiecies();
+                }else if (piece.player != null)
+                {
+                    action = Action.None;
+                    GroundManager.instance.UnSetMovablePiecies();
+                    ClickOnPiece(piece);
+                    return;
+                }
+                else if (selectedPiece.player != null && piece.movable)
+                    selectedPiece.player.Move(piece);
+                else
+                {
+                    break;
+                }
 			action = Action.None;
-			break;
+            break;
+
+
+            case Action.Attack:
+                if (selectedPiece != null && selectedPiece.player != null)
+                    selectedPiece.player.LaunchAttack(piece);
+                //action = Action.None;
+                break;
+
 
 		case Action.Creation:
-			if (players.Count < PlayerNumber) {
+			if (players.Count < PlayerNumber && piece.player == null) {
 				piece.player = CreateNewPlayer (piece);
 			}
 			if (players.Count >= PlayerNumber)
 				action = Action.None;
 			break;
-
-		case Action.Attack:
-			if (selectedPiece.player != null) {
-				selectedPiece.player.LaunchAttack (piece);
-			}
-			break;
-
 		default :
 			break;
 		}
@@ -91,11 +114,18 @@ public class GameManager : Singleton<GameManager> {
 			selectedPiece = null;
 	}
 		
-		
+    private void UnSelectPiece()
+    {
+        if (selectedPiece != null)
+        {
+            selectedPiece.selected = false;
+            selectedPiece = null;
+            GroundManager.instance.UnSetMovablePiecies();
+        }
+    }
 	private Player CreateNewPlayer(GroundPiece piece)
 	{
-		Player p = new Player (PlayerTemplate, piece.transform.position);
-		p.piece = piece;
+		Player p = new Player (PlayerTemplate, piece);
 		players.Add (p);
 		return p;
 	}

@@ -13,6 +13,8 @@ public class Blink : MonoBehaviour {
 	private Vector3 initialScale;
 	private Vector3 targetScale;
 
+    private static float lifeTime = 0;
+
 	private void Start()
 	{
 		
@@ -49,19 +51,22 @@ public class Blink : MonoBehaviour {
 
 	private IEnumerator Life()
 	{
-		int dir = 1;
-		float t = 0;
+		int dir = lifeTime < 0 ? -1 : 1;
+		float t = lifeTime < 0 ? -lifeTime : lifeTime;
 		while (coroutine != null)
 		{
 			t = t + dir * speed * Time.deltaTime;
-			transform.localScale = Vector3.Lerp (initialScale, targetScale, t);
+            lifeTime = t * dir;
+            transform.localScale = Vector3.Lerp (initialScale, targetScale, t);
 			if (t >= 1)
 				dir = -1;
 			else if (t <= 0)
 				dir = 1;
 			yield return new WaitForEndOfFrame ();
 		}
-	}
+        transform.localScale = initialScale;
+        
+    }
 
 	public void SetMove(bool active, bool enableRenderer){
 		meshRenderer.material = active ? movingMaterial : selectedMaterial;

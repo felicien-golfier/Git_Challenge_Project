@@ -6,11 +6,14 @@ public class GroundPiece : MonoBehaviour{
 	[HideInInspector]
 	public Player player = null;
 	[HideInInspector]
-	public Vector3 coord;
+	public int k;
+    [HideInInspector]
+    public int i;
+    [HideInInspector]
+    public int j;
+    //public Material mainMaterial;
 
-	//public Material mainMaterial;
-
-	public Blink blink;
+    public Blink blink;
 
 
 	public bool movable{
@@ -49,4 +52,9 @@ public class GroundPiece : MonoBehaviour{
 		if (blink == null)
 			blink = GetComponentInChildren<Blink> ();
 	}
+
+    public void Delete()
+    {
+
+    }
 }

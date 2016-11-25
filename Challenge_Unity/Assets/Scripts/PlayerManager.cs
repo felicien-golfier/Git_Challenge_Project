@@ -3,9 +3,8 @@ using System.Collections;
 
 public class PlayerManager : MonoBehaviour {
 
-	public GameObject projectile;
+    public GameObject projectile;
 
-	[HideInInspector]
 	public Player player;
 
 /*	// Use this for initialization

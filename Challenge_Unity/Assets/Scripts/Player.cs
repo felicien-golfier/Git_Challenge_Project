@@ -5,16 +5,19 @@ using System.Collections.Generic;
 public class Player {
 
 	public int moveRange = 1;
-	public PlayerManager playerMonobehavior;
+	public PlayerManager playerManager;
 	public GroundPiece piece = null;
 
 
-	public Player(PlayerManager p, Vector3 position)
+	public Player(PlayerManager p, GroundPiece piece)
 	{
-		playerMonobehavior = GameObject.Instantiate (p);
-		p.transform.position = Vector3.zero;
-		p.player = this;
-		p.transform.position = position;
+        this.piece = piece;
+
+        playerManager = GameObject.Instantiate (p);
+
+        playerManager.transform.position = piece.transform.position;
+        playerManager.player = this;
+        piece.player = this;
 		//p.gameObject.SetActive (false);
 	}
 
@@ -24,14 +27,14 @@ public class Player {
 		this.piece.player = null;
 		piece.player = this;
 		this.piece = piece;
-		playerMonobehavior.transform.position = piece.transform.position;
+		playerManager.transform.position = piece.transform.position;
 		GroundManager.instance.UnSetMovablePiecies ();
 	}
 
 	public void LaunchAttack(GroundPiece piece)
 	{
-		ProjectileLife pl = GameObject.Instantiate (playerMonobehavior.projectile).GetComponent<ProjectileLife>();
-		pl.transform.position = playerMonobehavior.transform.position;
+		ProjectileLife pl = GameObject.Instantiate (playerManager.projectile).GetComponent<ProjectileLife>();
+		pl.transform.position = playerManager.transform.position;
 		pl.targetPosition = piece.transform.position;
 	}
 /*	public Player(params object[] args)
